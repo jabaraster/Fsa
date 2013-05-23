@@ -1,5 +1,8 @@
 package jabara.fsa.web.ui;
 
+import jabara.fsa.service.IAuthenticationService;
+import jabara.general.ArgUtil;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.servlet.http.HttpServletRequest;
@@ -13,15 +16,20 @@ import org.apache.wicket.request.cycle.RequestCycle;
  * 
  */
 public class AppSession extends WebSession {
-    private static final long   serialVersionUID = -5522467353190211133L;
+    private static final long            serialVersionUID = -5522467353190211133L;
 
-    private final AtomicBoolean authenticated    = new AtomicBoolean(false);
+    private final AtomicBoolean          authenticated    = new AtomicBoolean(false);
+
+    private final IAuthenticationService authenticationService;
 
     /**
      * @param pRequest
+     * @param pAuthenticationService
      */
-    public AppSession(final Request pRequest) {
+    public AppSession(final Request pRequest, final IAuthenticationService pAuthenticationService) {
         super(pRequest);
+        ArgUtil.checkNull(pAuthenticationService, "pAuthenticationService"); //$NON-NLS-1$
+        this.authenticationService = pAuthenticationService;
     }
 
     /**
@@ -55,6 +63,8 @@ public class AppSession extends WebSession {
      * @throws FailAuthentication 認証NGの場合にスローして下さい.
      */
     public void login(final String pUser, final String pPassword) throws FailAuthentication {
+
+        jabara.Debug.write(this.authenticationService);
 
         // TODO 実際のログイン処理を実装して下さい.
 

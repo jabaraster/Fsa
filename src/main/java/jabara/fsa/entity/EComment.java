@@ -33,7 +33,7 @@ public class EComment extends EReadable<EComment> {
     @ManyToOne
     @JoinColumn(nullable = false)
     @NotNull
-    protected EBusinessItem   businessItem;
+    protected EReport         report;
 
     /**
      * 
@@ -44,10 +44,10 @@ public class EComment extends EReadable<EComment> {
     protected EMember         writer;
 
     /**
-     * @return businessItemを返す.
+     * @return reportを返す.
      */
-    public EBusinessItem getBusinessItem() {
-        return this.businessItem;
+    public EReport getReport() {
+        return this.report;
     }
 
     /**
@@ -65,10 +65,10 @@ public class EComment extends EReadable<EComment> {
     }
 
     /**
-     * @param pBusinessItem businessItemを設定.
+     * @param pReport reportを設定.
      */
-    public void setBusinessItem(final EBusinessItem pBusinessItem) {
-        this.businessItem = pBusinessItem;
+    public void setReport(final EReport pReport) {
+        this.report = pReport;
     }
 
     /**

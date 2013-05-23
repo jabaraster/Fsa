@@ -1,6 +1,7 @@
 package jabara.fsa.web;
 
 import jabara.fsa.Environment;
+import jabara.fsa.service.IMemberService;
 import jabara.fsa.web.rest.RestApplication;
 import jabara.fsa.web.ui.WicketApplication;
 import jabara.jpa.util.SystemPropertyToPostgreJpaPropertiesParser;
@@ -81,6 +82,7 @@ public class WebInitializer extends GuiceServletContextListener {
     @Override
     protected Injector getInjector() {
         this.injector = createInjector();
+        initializeDatabase();
         return this.injector;
     }
 
@@ -123,6 +125,10 @@ public class WebInitializer extends GuiceServletContextListener {
                 }), params);
             }
         });
+    }
+
+    private void initializeDatabase() {
+        this.injector.getInstance(IMemberService.class).insertAdministratorIfNotExists();
     }
 
     private static Dynamic addFilter(final ServletContext pServletContext, final Class<? extends Filter> pFilterType) {

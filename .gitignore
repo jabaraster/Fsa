@@ -1,4 +1,6 @@
 *.class
+src/main/webapp/WEB-INF/classes/
+target/
 
 # Package Files #
 *.jar

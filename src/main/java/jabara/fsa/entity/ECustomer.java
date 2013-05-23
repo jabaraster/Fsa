@@ -34,13 +34,13 @@ public class ECustomer extends EntityBase<ECustomer> {
     @ManyToOne
     @JoinColumn(nullable = false)
     @NotNull
-    protected EOrganization   belongOrganization  = new EOrganization();
+    protected EOrganization   belong  = new EOrganization();
 
     /**
      * @return belongOrganizationを返す.
      */
-    public EOrganization getBelongOrganization() {
-        return this.belongOrganization;
+    public EOrganization getBelong() {
+        return this.belong;
     }
 
     /**
@@ -53,8 +53,8 @@ public class ECustomer extends EntityBase<ECustomer> {
     /**
      * @param pBelongOrganization belongOrganizationを設定.
      */
-    public void setBelongOrganization(final EOrganization pBelongOrganization) {
-        this.belongOrganization = pBelongOrganization;
+    public void setBelong(final EOrganization pBelongOrganization) {
+        this.belong = pBelongOrganization;
     }
 
     /**

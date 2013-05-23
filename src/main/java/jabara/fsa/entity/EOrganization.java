@@ -44,7 +44,7 @@ public class EOrganization extends EntityBase<EOrganization> {
      */
     @Column(nullable = true, length = MAX_CHAR_COUNT_PHONE_NUMBER)
     @Size(min = MIN_CHAR_COUNT_PHONE_NUMBER, max = MAX_CHAR_COUNT_PHONE_NUMBER)
-    @PhoneNumber
+    @PhoneNumber(message = "電話番号の書式ではありません。")
     protected String          phoneNumber;
 
     /**

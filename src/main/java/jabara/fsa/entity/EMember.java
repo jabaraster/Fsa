@@ -27,10 +27,30 @@ public class EMember extends EntityBase<EMember> {
     protected String          name;
 
     /**
+     * 
+     */
+    @Column(nullable = false)
+    protected boolean         administrator       = false;
+
+    /**
      * @return nameを返す.
      */
     public String getName() {
         return this.name;
+    }
+
+    /**
+     * @return administratorを返す.
+     */
+    public boolean isAdministrator() {
+        return this.administrator;
+    }
+
+    /**
+     * @param pAdministrator administratorを設定.
+     */
+    public void setAdministrator(final boolean pAdministrator) {
+        this.administrator = pAdministrator;
     }
 
     /**

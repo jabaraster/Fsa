@@ -5,34 +5,29 @@ package jabara.fsa.service.impl;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import jabara.fsa.Environment;
 import jabara.fsa.WebStarter;
 import jabara.fsa.entity.EBusinessItem;
-import jabara.fsa.entity.EComment;
 import jabara.fsa.entity.ECustomer;
 import jabara.fsa.entity.EMember;
 import jabara.fsa.entity.EOrganization;
-import jabara.fsa.entity.ERead;
-import jabara.fsa.entity.EReadable;
+import jabara.fsa.entity.EReadBase_;
 import jabara.fsa.entity.EReport;
-import jabara.jpa_guice.ThreadLocalEntityManagerFactoryHandler;
+import jabara.fsa.entity.EReportRead;
+import jabara.fsa.entity.EReportRead_;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.List;
 
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
@@ -54,163 +49,95 @@ public class ReportServiceImplTest {
     /**
      * @author jabaraster
      */
-    @Ignore
-    public static abstract class Base {
-        EntityManagerFactory emf;
-        ReportServiceImpl    sut;
-
-        /**
-         * @return -
-         */
-        @SuppressWarnings({ "nls" })
-        public EReport insert() {
-            final EntityManager em = this.emf.createEntityManager();
-
-            final EOrganization organization = new EOrganization();
-            organization.setAddress("熊本市西区");
-            organization.setName("有限会社じゃばら");
-            organization.setPhoneNumber("000-0001-0000");
-            em.persist(organization);
-
-            final ECustomer customer = new ECustomer();
-            customer.setName("河野　智遵");
-            customer.setBelongOrganization(organization);
-            em.persist(customer);
-
-            final EBusinessItem item = new EBusinessItem();
-            item.setCustomer(customer);
-            item.setName("Web予約システム構築");
-            em.persist(item);
-
-            final EMember member = new EMember();
-            member.setName("河野");
-            em.persist(member);
-
-            em.flush();
-            em.clear();
-
-            final EReport report = new EReport();
-            report.setBusinessItem(item);
-            report.setReportDate(Calendar.getInstance().getTime());
-            report.setText("報告内容です。");
-            report.setWriter(member);
-
-            this.sut.insert(report);
-
-            em.flush();
-            em.clear();
-
-            return report;
-        }
-
+    public static class Other {
         /**
          * 
          */
-        @Before
-        public void setUp() {
-            this.emf = ThreadLocalEntityManagerFactoryHandler.wrap(Persistence.createEntityManagerFactory(Environment.getApplicationName()));
-            this.sut = new ReportServiceImpl(this.emf);
-            this.emf.createEntityManager().getTransaction().begin();
-        }
-
-        /**
-     * 
-     */
-        @After
-        public void tearDown() {
-            if (this.emf != null) {
-                this.emf.createEntityManager().getTransaction().rollback();
-                this.emf.close();
-            }
-        }
-    }
-
-    /**
-     * @author jabaraster
-     */
-    public static class Other extends Base {
-
-        /**
-         * 
-         */
-        @Test
-        public void _test() {
-            final EntityManager em = this.emf.createEntityManager();
-
-            final EReport report0 = insert();
-            final EReport report1 = insert();
-
-            final EComment comment = new EComment();
-            comment.setBusinessItem(report0.getBusinessItem());
-            comment.setText("aaa"); //$NON-NLS-1$
-            comment.setWriter(report0.getWriter());
-            em.persist(comment);
-
-            final ERead read0 = new ERead();
-            read0.setRead(report0);
-            read0.setMember(report1.getWriter());
-
-            final ERead read1 = new ERead();
-            read1.setRead(comment);
-            read1.setMember(report0.getWriter());
-
-            em.persist(read0);
-            em.persist(read1);
-
-            em.flush();
-            em.clear();
-
-            for (final EReadable<?> read : selectReadable()) {
-                System.out.println(read);
-            }
-        }
-
-        @SuppressWarnings({ "rawtypes", "unchecked" })
-        private List<EReadable<?>> selectReadable() {
-            final EntityManager em = this.emf.createEntityManager();
-            final CriteriaBuilder builder = em.getCriteriaBuilder();
-            final CriteriaQuery<EReadable> query = builder.createQuery(EReadable.class);
-            query.from(EReadable.class);
-            final List<EReadable> list = em.createQuery(query).getResultList();
-            final List<EReadable<?>> ret = new ArrayList<>();
-            ret.addAll((Collection<? extends EReadable<?>>) list);
-            return ret;
-        }
-    }
-
-    /**
-     * @author jabaraster
-     */
-    @Ignore
-    public static class RecordCountIsOne extends Base {
+        @Rule
+        public final JpaDaoRule<ReportServiceImpl> tool = new JpaDaoRule<ReportServiceImpl>() {
+                                                            @Override
+                                                            protected ReportServiceImpl createService(final EntityManagerFactory pEntityManagerFactory) {
+                                                                return new ReportServiceImpl(pEntityManagerFactory);
+                                                            }
+                                                        };
 
         /**
          * 
          */
         @SuppressWarnings("boxing")
         @Test
-        public void _countAll() {
-            assertThat(this.sut.countAll(), is(1L));
+        public void test() {
+            insertReport();
+            insertReport();
+            final EReport report = insertReport();
+            final EMember reportReader = this.tool.insertMember("じゃばら"); //$NON-NLS-1$
+            insertReportRead(report, reportReader);
+
+            assertThat(getReports().size(), is(3));
+            assertThat(getReadReports(reportReader).size(), is(1));
+            assertThat(getUnreadReports(report.getWriter()).size(), is(2));
         }
 
-        /**
-         * 
-         */
-        @Test
-        public void _getAll() {
-            for (final EReport report : this.sut.getAll(0, 10)) {
-                System.out.println(report.getBusinessItem());
+        private List<EReport> getReadReports(final EMember pReportReader) {
+            return getReportsCore(pReportReader, Readable.READ);
+        }
+
+        private List<EReport> getReports() {
+            return getReportsCore(null, Readable.OUT_OF);
+        }
+
+        private List<EReport> getReportsCore(final EMember pReportReader, final Readable pReadable) {
+            final EntityManager em = this.tool.getEntityManager();
+            final CriteriaBuilder builder = em.getCriteriaBuilder();
+            final CriteriaQuery<EReport> query = builder.createQuery(EReport.class);
+            final Root<EReport> root = query.from(EReport.class);
+
+            if (pReadable != Readable.OUT_OF) {
+                final Subquery<String> subquery = query.subquery(String.class);
+                final Root<EReportRead> subqueryRoot = subquery.from(EReportRead.class);
+                subquery.correlate(root);
+                subquery.select(builder.literal("X")); //$NON-NLS-1$
+                subquery.where( //
+                        builder.equal(subqueryRoot.get(EReportRead_.report), root) //
+                        , builder.equal(subqueryRoot.get(EReadBase_.member), pReportReader) //
+                );
+
+                if (pReadable == Readable.READ) {
+                    query.where(builder.exists(subquery));
+                } else {
+                    query.where(builder.not(builder.exists(subquery)));
+                }
             }
+
+            return em.createQuery(query).getResultList();
         }
 
-        /**
-         * @see jabara.fsa.service.impl.ReportServiceImplTest.Base#setUp()
-         */
-        @Before
-        @Override
-        public void setUp() {
-            super.setUp();
-            insert();
+        private List<EReport> getUnreadReports(final EMember pReportReader) {
+            return getReportsCore(pReportReader, Readable.UNREAD);
+        }
+
+        @SuppressWarnings("nls")
+        private EReport insertReport() {
+            final EMember member = this.tool.insertMember("河野");
+            final EOrganization organization = this.tool.insertOrganization("企業", "住所", "092-123-4567");
+            final ECustomer customer = this.tool.insertCustomer("顧客", organization);
+            final EBusinessItem businessItem = this.tool.insertBusinessItem("案件X", customer);
+            return this.tool.insertReport( //
+                    member //
+                    , businessItem //
+                    , Calendar.getInstance() //
+                    , "報告です。");
+        }
+
+        private void insertReportRead(final EReport pReport, final EMember pReportReader) {
+            final EReportRead rr = new EReportRead();
+            rr.setMember(pReportReader);
+            rr.setReport(pReport);
+            this.tool.getEntityManager().persist(rr);
+        }
+
+        enum Readable {
+            READ, UNREAD, OUT_OF, ;
         }
     }
 }

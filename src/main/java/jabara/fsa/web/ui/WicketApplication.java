@@ -1,5 +1,6 @@
 package jabara.fsa.web.ui;
 
+import jabara.fsa.service.IAuthenticationService;
 import jabara.fsa.web.ui.page.LoginPage;
 import jabara.fsa.web.ui.page.LogoutPage;
 import jabara.fsa.web.ui.page.RestrictedPageBase;
@@ -48,7 +49,7 @@ public class WicketApplication extends WebApplication {
      */
     @Override
     public Session newSession(final Request pRequest, @SuppressWarnings("unused") final Response pResponse) {
-        return new AppSession(pRequest);
+        return new AppSession(pRequest, this.injectorProvider.get().getInstance(IAuthenticationService.class));
     }
 
     /**
