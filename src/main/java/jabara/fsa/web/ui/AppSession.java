@@ -1,9 +1,11 @@
 package jabara.fsa.web.ui;
 
+import jabara.fsa.model.FailAuthentication;
 import jabara.fsa.service.IAuthenticationService;
+import jabara.fsa.service.IAuthenticationService.AuthenticatedAs;
 import jabara.general.ArgUtil;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -16,11 +18,11 @@ import org.apache.wicket.request.cycle.RequestCycle;
  * 
  */
 public class AppSession extends WebSession {
-    private static final long            serialVersionUID = -5522467353190211133L;
+    private static final long                      serialVersionUID = -5522467353190211133L;
 
-    private final AtomicBoolean          authenticated    = new AtomicBoolean(false);
+    private final AtomicReference<AuthenticatedAs> authenticated    = new AtomicReference<>();
 
-    private final IAuthenticationService authenticationService;
+    private final IAuthenticationService           authenticationService;
 
     /**
      * @param pRequest
@@ -30,6 +32,23 @@ public class AppSession extends WebSession {
         super(pRequest);
         ArgUtil.checkNull(pAuthenticationService, "pAuthenticationService"); //$NON-NLS-1$
         this.authenticationService = pAuthenticationService;
+    }
+
+    /**
+     * @return 管理者ユーザとしてログイン済みならtrue.
+     */
+    public boolean currentUserIsAdministrator() {
+        if (!isAuthenticatedCore()) {
+            return false;
+        }
+        switch (this.authenticated.get()) {
+        case NORMAL_USER:
+            return false;
+        case ADMINISTRATOR:
+            return true;
+        default:
+            throw new IllegalStateException();
+        }
     }
 
     /**
@@ -54,7 +73,7 @@ public class AppSession extends WebSession {
      * @return 認証済みあればtrue.
      */
     public boolean isAuthenticated() {
-        return this.authenticated.get();
+        return isAuthenticatedCore();
     }
 
     /**
@@ -63,15 +82,11 @@ public class AppSession extends WebSession {
      * @throws FailAuthentication 認証NGの場合にスローして下さい.
      */
     public void login(final String pUser, final String pPassword) throws FailAuthentication {
+        this.authenticated.set(this.authenticationService.login(pUser, pPassword));
+    }
 
-        jabara.Debug.write(this.authenticationService);
-
-        // TODO 実際のログイン処理を実装して下さい.
-
-        if ("ng".equals(pUser)) { //$NON-NLS-1$
-            throw FailAuthentication.INSTANCE;
-        }
-        this.authenticated.set(true);
+    private boolean isAuthenticatedCore() {
+        return this.authenticated.get() != null;
     }
 
     /**

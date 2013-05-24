@@ -1,7 +1,7 @@
 /**
  * 
  */
-package jabara.fsa.web.ui;
+package jabara.fsa.model;
 
 /**
  * @author jabaraster

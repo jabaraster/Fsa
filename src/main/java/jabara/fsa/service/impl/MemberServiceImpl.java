@@ -3,6 +3,7 @@
  */
 package jabara.fsa.service.impl;
 
+import jabara.fsa.entity.ELoginPassword;
 import jabara.fsa.entity.EMember;
 import jabara.fsa.service.IMemberService;
 import jabara.jpa.JpaDaoBase;
@@ -35,10 +36,18 @@ public class MemberServiceImpl extends JpaDaoBase implements IMemberService {
         if (existsAministrator()) {
             return;
         }
+
+        final EntityManager em = getEntityManager();
+
         final EMember member = new EMember();
         member.setAdministrator(true);
-        member.setName("管理者"); //$NON-NLS-1$
-        getEntityManager().persist(member);
+        member.setUserId("administrator"); //$NON-NLS-1$
+        em.persist(member);
+
+        final ELoginPassword password = new ELoginPassword();
+        password.setPassword("password"); //$NON-NLS-1$
+        password.setUser(member);
+        em.persist(password);
     }
 
     private boolean existsAministrator() {

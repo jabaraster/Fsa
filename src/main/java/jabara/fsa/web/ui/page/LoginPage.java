@@ -1,7 +1,7 @@
 package jabara.fsa.web.ui.page;
 
+import jabara.fsa.model.FailAuthentication;
 import jabara.fsa.web.ui.AppSession;
-import jabara.fsa.web.ui.FailAuthentication;
 import jabara.general.Empty;
 import jabara.wicket.ErrorClassAppender;
 

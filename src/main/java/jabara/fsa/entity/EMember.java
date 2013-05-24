@@ -17,14 +17,14 @@ import javax.validation.constraints.NotNull;
 public class EMember extends EntityBase<EMember> {
     private static final long serialVersionUID    = -6160695120326005348L;
 
-    private static final int  MAX_CHAR_COUNT_NAME = 100;
+    private static final int  MAX_CHAR_COUNT_USER_ID = 100;
     /**
      * 
      */
-    @Column(nullable = false, length = MAX_CHAR_COUNT_NAME * 3)
+    @Column(nullable = false, length = MAX_CHAR_COUNT_USER_ID * 3, unique = true)
     @NotNull
-    @RequireMaxCharCount(MAX_CHAR_COUNT_NAME)
-    protected String          name;
+    @RequireMaxCharCount(MAX_CHAR_COUNT_USER_ID)
+    protected String          userId;
 
     /**
      * 
@@ -35,8 +35,8 @@ public class EMember extends EntityBase<EMember> {
     /**
      * @return nameを返す.
      */
-    public String getName() {
-        return this.name;
+    public String getUserId() {
+        return this.userId;
     }
 
     /**
@@ -56,8 +56,8 @@ public class EMember extends EntityBase<EMember> {
     /**
      * @param pName nameを設定.
      */
-    public void setName(final String pName) {
-        this.name = pName;
+    public void setUserId(final String pName) {
+        this.userId = pName;
     }
 
 }

@@ -3,6 +3,7 @@ package jabara.fsa.web.ui;
 import jabara.fsa.service.IAuthenticationService;
 import jabara.fsa.web.ui.page.LoginPage;
 import jabara.fsa.web.ui.page.LogoutPage;
+import jabara.fsa.web.ui.page.ProtedtedPageBase;
 import jabara.fsa.web.ui.page.RestrictedPageBase;
 import jabara.fsa.web.ui.page.TopPage;
 import jabara.general.ArgUtil;
@@ -94,7 +95,11 @@ public class WicketApplication extends WebApplication {
 
             @Override
             protected Class<? extends Page> getRestictedPageType() {
-                return RestrictedPageBase.class;
+                if (AppSession.get().currentUserIsAdministrator()) {
+                    return RestrictedPageBase.class;
+                } else {
+                    return ProtedtedPageBase.class;
+                }
             }
 
             @Override

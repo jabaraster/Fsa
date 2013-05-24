@@ -102,12 +102,12 @@ public abstract class JpaDaoRule<S> implements TestRule {
     }
 
     /**
-     * @param pName
+     * @param pUserId
      * @return -
      */
-    public EMember insertMember(final String pName) {
+    public EMember insertMember(final String pUserId) {
         final EMember member = new EMember();
-        member.setName(pName);
+        member.setUserId(pUserId);
         return persist(member);
     }
 
